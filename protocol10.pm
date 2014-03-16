@@ -2,7 +2,6 @@ package protocol10;
 
 use strict;
 use warnings;
-use autodie;
 use Class::Struct;
 
 use constant {
@@ -19,8 +18,8 @@ use constant {
     OFP_ETH_ALEN                => 6,           
 };
 
-use constant {
-    #ofp_port
+#ofp_port
+use constant {   
     OFPP_MAX        => 0xff00,
     OFPP_IN_PORT    => 0xfff8,
     OFPP_TABLE      => 0xfff9,
@@ -32,8 +31,8 @@ use constant {
     OFPP_NONE       => 0xffff,
 };
 
-use constant {
-    #ofp_type
+#ofp_type
+use constant {  
     OFPT_HELLO                      => 0x00,
     OFPT_ERROR                      => 0x01,
     OFPT_ECHO_REQUEST               => 0x02,
@@ -62,16 +61,16 @@ use constant {
     OFP_DEFAULT_MISS_SEND_LEN   => 128,
 };
 
-use constant {
-    #ofp_config_flags
+#ofp_config_flags
+use constant {   
     OFPC_FRAG_NORMAL    => 0x0000,
     OFPC_FRAG_DROP      => 0x0001,
     OFPC_FRAG_REASM     => 0x0002,
     OFPC_FRAG_MASK      => 0x0003,
 };
 
+#ofp_capabilities
 use constant {
-    #ofp_capabilities
     OFPC_FLOW_STATS     => (1 << 0),
     OFPC_TABLE_STATS    => (1 << 1),
     OFPC_PORT_STATS     => (1 << 2),
@@ -82,8 +81,8 @@ use constant {
     OFPC_ARP_MATCH_IP   => (1 << 7),
 };
 
-use constant {
-    #ofp_port_config
+#ofp_port_config
+use constant {  
     OFPPC_PORT_DOWN     => (1 << 0),
     OFPPC_NO_STP        => (1 << 1),
     OFPPC_NO_RECV       => (1 << 2),
@@ -93,8 +92,8 @@ use constant {
     OFPPC_NO_PACKET_IN  => (1 << 6),
 };
 
-use constant {
-    #ofp_port_state
+#ofp_port_state
+use constant {  
     OFPPS_LINK_DOWN     => (1 << 0),
     OFPPS_STP_LISTEN    => (0 << 8),
     OFPPS_STP_LEARN     => (1 << 8),
@@ -103,8 +102,8 @@ use constant {
     OFPPS_STP_MASK      => (3 << 8),
 };
 
-use constant {
-    #ofp_port_features
+#ofp_port_features
+use constant {   
     OFPPF_10MB_HD       => (1 << 0),
     OFPPF_10MB_FD       => (1 << 1),
     OFPPF_100MB_HD      => (1 << 2),
@@ -119,21 +118,21 @@ use constant {
     OFPPF_PAUSE_ASYM    => (1 << 11),
 };
 
-use constant {
-    #ofp_port_reason
+#ofp_port_reason
+use constant {   
     OFPPR_ADD       => 0x00,
     OFPPR_DELETE    => 0x01,
     OFPPR_MODIFY    => 0x02,
 };
 
-use constant {
-    #ofp_packet_in_reason
+#ofp_packet_in_reason
+use constant {   
     OFPR_NO_MATCH   => 0x00,
     OFPR_ACTION     => 0x01,
 };
 
-use constant {
-    #ofp_action_type
+#ofp_action_type
+use constant {  
     OFPAT_OUTPUT        => 0x0000,
     OFPAT_SET_VLAN_VID  => 0x0001,
     OFPAT_SET_VLAN_PCP  => 0x0002,
@@ -152,8 +151,8 @@ use constant {
     OFP_VLAN_NONE   => 0xffff,
 };
 
-use constant {
-    #ofp_flow_mod_command
+#ofp_flow_mod_command
+use constant {  
     OFPFC_ADD           => 0x00,
     OFPFC_MODIFY        => 0x01,
     OFPFC_MODIFY_STRICT => 0x02,
@@ -161,8 +160,8 @@ use constant {
     OFPFC_DELETE_STRICT => 0x04,
 };
 
-use constant {
-    #ofp_flow_wildcards
+#ofp_flow_wildcards
+use constant {    
     OFPFW_IN_PORT       => (1 << 0),
     OFPFW_DL_VLAN       => (1 << 1),
     OFPFW_DL_SRC        => (1 << 2),
@@ -196,22 +195,23 @@ use constant {
     OFP_DEFAULT_PRIORITY        => 0x8000,
 };
 
-use constant {
-    #ofp_flow_mod_flags
+#ofp_flow_mod_flags
+use constant { 
     OFPFF_SEND_FLOW_REM => (1 << 0),
     OFPFF_CHECK_OVERLAP => (1 << 1),
     OFPFF_RESET_COUNTS  => (1 << 2),
 };
 
+#ofp_flow_removed_reason
 use constant {
-    #ofp_flow_removed_reason
+    
     OFPRR_IDLE_TIMEOUT  => 0x00,
     OFPRR_HARD_TIMEOUT  => 0x01,
     OFPRR_DELETE        => 0x02,
 };
 
-use constant {
-    #ofp_error_type
+#ofp_error_type
+use constant {  
     OFPET_HELLO_FAILED      => 0x0000,
     OFPET_BAD_REQUEST       => 0x0001,
     OFPET_BAD_ACTION        => 0x0002,
@@ -220,14 +220,14 @@ use constant {
     OFPET_QUEUE_OP_FAILED   => 0x0005,
 };
 
-use constant {
-    #ofp_hello_failed_code
+#ofp_hello_failed_code
+use constant {  
     OFPHFC_INCOMPATIBLE => 0x0000,
     OFPHFC_EPERM        => 0x0001,
 };
 
+#ofp_bad_request_code
 use constant {
-    #ofp_bad_request_code
     OFPBRC_BAD_VERSION      => 0x0000,
     OFPBRC_BAD_TYPE         => 0x0001,
     OFPBRC_BAD_STAT         => 0x0002,
@@ -239,8 +239,8 @@ use constant {
     OFPBRC_BUFFER_UNKNOWN   => 0x0008,
 };
 
+#ofp_bad_action_code
 use constant {
-    #ofp_bad_action_code
     OFPBAC_BAD_TYPE         => 0x0000,
     OFPBAC_BAD_LEN          => 0x0001,
     OFPBAC_BAD_VENDOR       => 0x0002,
@@ -252,8 +252,8 @@ use constant {
     OFPBAC_BAD_QUEUE        => 0x0008,
 };
 
+#ofp_flow_mod_failed_code
 use constant {
-    #ofp_flow_mod_failed_code
     OFPFMFC_ALL_TABLES_FULL     => 0x0000,
     OFPFMFC_OVERLAP             => 0x0001,
     OFPFMFC_EPERM               => 0x0002,
@@ -262,21 +262,21 @@ use constant {
     OFPFMFC_UNSUPPORTED         => 0x0005,
 };
 
+#ofp_port_mod_failed_code
 use constant {
-    #ofp_port_mod_failed_code
     OFPPMFC_BAD_PORT    => 0x0000,
     OFPPMFC_BAD_HW_ADDR => 0x0001,
 };
 
+#ofp_queue_op_failed_code
 use constant {
-    #ofp_queue_op_failed_code
     OFPQOFC_BAD_PORT    => 0x0000,
     OFPQOFC_BAD_QUEUE   => 0x0001,
     OFPQOFC_EPERM       => 0x0002,
 };
 
+#ofp_stats_types
 use constant {
-    #ofp_stats_types
     OFPST_DESC      => 0x0000,
     OFPST_FLOW      => 0x0001,
     OFPST_AGGREGATE => 0x0002,
@@ -286,8 +286,8 @@ use constant {
     OFPST_VENDOR    => 0xffff,
 };
 
+#ofp_stats_reply_flags
 use constant {
-    #ofp_stats_reply_flags
     OFPSF_REPLY_MORE    => (1 << 0),
 };
 
@@ -299,8 +299,8 @@ use constant {
     OFPQ_MIN_RATE_UNCFG => 0xffff,
 };
 
+#ofp_queue_properties
 use constant {
-    #ofp_queue_properties
     OFPQT_NONE      => 0x0000,
     OFPQT_MIN_RATE  => 0x0001,
 };
@@ -948,18 +948,4 @@ sub proc {
 }
 
 1;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
