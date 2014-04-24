@@ -92,16 +92,13 @@ enum ofp_port_no {
     OFPP_TABLE      = 0xfffffff9,  /* Submit the packet to the first flow table
                                       NB: This destination port can only be
                                       used in packet-out messages. */
-    OFPP_NORMAL     = 0xfffffffa,  /* Process with normal L2/L3 switching. */
-    OFPP_FLOOD      = 0xfffffffb,  /* All physical ports in VLAN, except input
-                                      port and those blocked or link down. */
-    OFPP_ALL        = 0xfffffffc,  /* All physical ports except input port. */
+    OFPP_NORMAL     = 0xfffffffa,  /* Forward using non-OpenFlow pipeline. */
+    OFPP_FLOOD      = 0xfffffffb,  /* Flood using non-OpenFlow pipeline. */
+    OFPP_ALL        = 0xfffffffc,  /* All standard ports except input port. */
     OFPP_CONTROLLER = 0xfffffffd,  /* Send to controller. */
     OFPP_LOCAL      = 0xfffffffe,  /* Local openflow "port". */
-    OFPP_ANY        = 0xffffffff   /* Wildcard port used only for flow mod
-                                      (delete) and flow stats requests. Selects
-                                      all flows regardless of output port
-                                      (including flows with no output port). */
+    OFPP_ANY        = 0xffffffff   /* Special value used in some requests when
+                                      no port is specified (i.e. wildcarded). */
 };
 
 enum ofp_type {
@@ -145,7 +142,7 @@ enum ofp_type {
 
     /* Controller role change request messages. */
     OFPT_ROLE_REQUEST       = 24, /* Controller/switch message */
-    OFPT_ROLE_REPLY         = 25, /* Controller/switch message */
+    OFPT_ROLE_REPLY         = 25, /* Controller/switchf message */
 
     /* Asynchronous message configuration. */
     OFPT_GET_ASYNC_REQUEST  = 26, /* Controller/switch message */
@@ -414,7 +411,9 @@ struct ofp_match {
 };
 OFP_ASSERT(sizeof(struct ofp_match) == 8);
 
-/* Components of a OXM TLV header. */
+/* Components of a OXM TLV header.
+ * Those macros are not valid for the experimenter class, macros for the
+ * experimenter class will depend on the experimenter header used. */
 #define OXM_HEADER__(CLASS, FIELD, HASMASK, LENGTH) \
     (((CLASS) << 16) | ((FIELD) << 9) | ((HASMASK) << 8) | (LENGTH))
 #define OXM_HEADER(CLASS, FIELD, LENGTH) \
@@ -764,8 +763,10 @@ enum ofp_vlan_id {
  * Format: 32-bit integer with 12 most-significant bits forced to 0.
  * Only the lower 20 bits have meaning.
  *
- * Masking: Not maskable. */
+ * Masking: Arbitrary masks.
+ */
 #define OXM_OF_IPV6_FLABEL   OXM_HEADER  (0x8000, OFPXMT_OFB_IPV6_FLABEL, 4)
+#define OXM_OF_IPV6_FLABEL_W OXM_HEADER_W(0x8000, OFPXMT_OFB_IPV6_FLABEL, 4)
 
 /* The type or code in the ICMPv6 header.
  *
@@ -908,7 +909,9 @@ enum ofp_ipv6exthdr_flags {
     OFPIEH_UNSEQ  = 1 << 8,     /* Unexpected sequencing encountered. */
 };
 
-/* Header for OXM experimenter match fields. */
+/* Header for OXM experimenter match fields.
+ * The experimenter class should not use OXM_HEADER() macros for defining
+ * fields due to this extra header. */
 struct ofp_oxm_experimenter_header {
     uint32_t oxm_header;        /* oxm_class = OFPXMC_EXPERIMENTER */
     uint32_t experimenter;      /* Experimenter ID which takes the same
@@ -1201,10 +1204,7 @@ enum ofp_group {
     /* Fake groups. */
     OFPG_ALL        = 0xfffffffc,  /* Represents all groups for group delete
                                       commands. */
-    OFPG_ANY        = 0xffffffff   /* Wildcard group used only for flow stats
-                                      requests. Selects all flows regardless of
-                                      group (including flows with no group).
-                                      */
+    OFPG_ANY        = 0xffffffff   /* Special wildcard: no group specified. */
 };
 
 /* Group commands */
@@ -1216,7 +1216,7 @@ enum ofp_group_mod_command {
 
 /* Bucket for use in groups. */
 struct ofp_bucket {
-    uint16_t len;                   /* Length the bucket in bytes, including
+    uint16_t len;                   /* Length of the bucket in bytes, including
                                        this header and any padding to make it
                                        64-bit aligned. */
     uint16_t weight;                /* Relative weight of bucket.  Only
@@ -1379,7 +1379,8 @@ struct ofp_meter_band_dscp_remark {
 };
 OFP_ASSERT(sizeof(struct ofp_meter_band_dscp_remark) == 16);
 
-/* OFPMBT_EXPERIMENTER band - Write actions in action set */
+/* OFPMBT_EXPERIMENTER band - Experimenter type.
+ * The rest of the band is experimenter-defined. */
 struct ofp_meter_band_experimenter {
     uint16_t        type;    /* One of OFPMBT_*. */
     uint16_t        len;     /* Length in bytes of this band. */
@@ -1628,11 +1629,12 @@ enum ofp_meter_mod_failed_code {
     OFPMMFC_UNKNOWN       = 0,  /* Unspecified error. */
     OFPMMFC_METER_EXISTS  = 1,  /* Meter not added because a Meter ADD
                                  * attempted to replace an existing Meter. */
-    OFPMMFC_INVALID_METER = 2,      /* Meter not added because Meter specified
-                                 * is invalid. */
-    OFPMMFC_UNKNOWN_METER = 3,  /* Meter not modified because a Meter
-                                   MODIFY attempted to modify a non-existent
-                                   Meter. */
+    OFPMMFC_INVALID_METER = 2,  /* Meter not added because Meter specified
+                                 * is invalid,
+                                 * or invalid meter in meter action. */
+    OFPMMFC_UNKNOWN_METER = 3,  /* Meter not modified because a Meter MODIFY
+                                 * attempted to modify a non-existent Meter,
+                                 * or bad meter in meter action. */
     OFPMMFC_BAD_COMMAND   = 4,  /* Unsupported or unknown command. */
     OFPMMFC_BAD_FLAGS     = 5,  /* Flag configuration unsupported. */
     OFPMMFC_BAD_RATE      = 6,  /* Rate unsupported. */

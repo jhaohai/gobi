@@ -1,8 +1,7 @@
-package protocol13;
+package OpenFlow13;
 
 use strict;
 use warnings;
-use Class::Struct;
 
 use constant {
     OPENFLOW_OPENFLOW_H         => 1,
