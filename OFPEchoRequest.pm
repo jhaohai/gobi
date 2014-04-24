@@ -1,4 +1,4 @@
-package OFPHello;
+package OFPEchoRequest;
 
 use strict;
 use warnings;
@@ -14,7 +14,7 @@ sub new {
     my $self = {};
     bless($self, $class);
     $self->{header} = OFPHeader->new();
-    $self->{header}->{type} = OFPType->OFPT_HELLO;
+    $self->{header}->{type} = OFPType->OFPT_ECHO_REQUEST;
     $self->{header}->{length} = 8;
     $self->{header}->{xid} = 0;
     return $self;
