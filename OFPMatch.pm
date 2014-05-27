@@ -21,7 +21,7 @@ sub decode {
     my $self = shift;
     my $buf = shift;
     ($self->{type}, $self->{length}) = unpack("n n", substr($buf, 0, 4));
-    my $oxm = substr($buf, 4, $self->{length}-4);
+    my $oxm = substr($buf, 4);
     while(length($oxm)) {
         my $oxmtlv = OFPOXMTLV->new();
         $oxm = $oxmtlv->decode($oxm);
