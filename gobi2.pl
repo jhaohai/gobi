@@ -2,8 +2,6 @@ package gobi2;
 
 use strict;
 use warnings;
-use IO::Socket::INET;
-use IO::Select;
 
 use OpenFlow;
 

@@ -29,5 +29,13 @@ sub decode {
     }
 }
 
+sub set {
+    
+}
+
+sub encode {
+    my $self = shift;
+}
+
 
 1;
