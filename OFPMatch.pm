@@ -25,16 +25,26 @@ sub decode {
     while(length($oxm)) {
         my $oxmtlv = OFPOXMTLV->new();
         $oxm = $oxmtlv->decode($oxm);
-        push(@{$self->{oxm_fields}}, $oxmtlv);
+        $self->add($oxmtlv);
     }
 }
 
-sub set {
-    
+sub add {
+    my $self = shift;
+    my $oxmtlv = shift;
+    push(@{$self->{oxm_fields}}, $oxmtlv);
 }
 
 sub encode {
     my $self = shift;
+    my $body = "";
+    foreach my $oxmtlv (@{$self->{oxm_flelds}}) {
+        $body .= $oxmtlv->encode();
+    }
+    my $len = length($body) + 4;
+    my $pad_len = int(($len + 7) / 8) * 8 - $len;
+    my $buf = pack("n n", $self->{type}, $len).$body.pack("x$pad_len");
+    return $buf;
 }
 
 
