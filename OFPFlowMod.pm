@@ -18,6 +18,7 @@ my $buffer_id;
 my $out_port;
 my $out_group;
 my $match;
+my $insts;
 
 sub new {
     my $class = shift;
@@ -35,8 +36,13 @@ sub set {
     $self->{cookie_mask} = 0;
     $self->{table_id} = 0;
     $self->{command} = 0;
-    $self->{idle_timeout} = shift;
-    $self->{hard_timeout} = shift;
-    $self->{priority} = shift;
+    $self->{idle_timeout} = 1;
+    $self->{hard_timeout} = 1;
+    $self->{priority} = 0x8000;
     $self->{buffer_id} = 0xffffffff;
+    $self->{out_port} = 0;
+    $self->{out_group} = 0;
+    $self->{flags} = 0;
+    $self->{match} = shift;
+    $self->{insts} = shift;
 }
