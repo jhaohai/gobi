@@ -6,3 +6,26 @@ use warnings;
 my $type;
 my $len;
 my $actions;
+
+sub new {
+    my $class = shift;
+    my $self = {};
+    bless($self, $class);
+    $self->{type} = 3;
+    $self->{len} = 8;
+    return $self;
+}
+
+sub add {
+    my $self = shift;
+    my $act = shift;
+    push(@{$self->{actions}}, $act);
+    $self->{len} += $act->{len};
+}
+
+sub encode {
+    
+}
+
+
+1;
