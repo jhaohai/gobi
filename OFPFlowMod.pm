@@ -44,5 +44,22 @@ sub set {
     $self->{out_group} = 0;
     $self->{flags} = 0;
     $self->{match} = shift;
-    $self->{insts} = shift;
+    $self->{header}->{length} = 48 + length($self->{match}->encode());
+}
+
+sub add {
+    my $self = shift;
+    push(@{$self->{insts}}, shift);
+    $self->{header}->{length} = $self->{header}->{length} + $self->{insts}->{len};
+}
+
+sub encode {
+    my $self = shift;
+    my $buf = pack("H16 H16 C C n n n N N N n x2", $self->{cookie}, $self->{cookie_mask}, $self->{table_id}, $self->{command}, $self->{idle_timeout}, $self->{hard_timeout}, $self->{priority}, $self->{buffer_id}, $self->{out_port}, $self->{out_group}, $self->{flags});
+    $buf = $self->{header}->encode().$buf;
+    $buf .= $self->{match}->encode();
+    foreach my $inst (@{$self->{insts}}) {
+        $buf .= $inst->encode();
+    }
+    return $buf;
 }

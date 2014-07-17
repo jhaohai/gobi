@@ -24,7 +24,12 @@ sub add {
 }
 
 sub encode {
-    
+    my $self = shift;
+    my $buf = pack("n n x4", $self->{type}, $self->{len});
+    foreach my $act (@{$self->{actions}}) {
+        $buf .= $act->encode();
+    }
+    return $buf;
 }
 
 
