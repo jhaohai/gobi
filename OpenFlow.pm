@@ -15,6 +15,8 @@ use OFPFeaturesReply;
 use OFPPacketIn;
 use OFPSwitch;
 
+use AppHub;
+
 my $select;
 my $server;
 my %switches;
@@ -111,7 +113,16 @@ sub handle_switch {
         print "PACKET_IN\n";
         my $ofp_packet_in = OFPPacketIn->new();
         $ofp_packet_in->decode($ofp_header, $ofp_data);
-        handle_packetin($switch, $ofp_packet_in);
+        #handle_packetin($sock, $ofp_packet_in);
+        my $ofpmod = OFPFlowMod->new();
+        my $ofpmatch = OFPMatch->new();
+        $ofpmod->set($ofpmatch);
+        my $ofpinst = OFPINSTACT->new();
+        my $ofpact = OFPACTOUT->new();
+        $ofpact->set(0xfffffffc);
+        $ofpinst->add($ofpact);
+        $ofpmod->add($ofpinst);
+        $sock->send($ofpmod->encode());
     }
     elsif($ofp_header->{type} == OFPType->OFPT_MULTIPART_REPLY) {
 
@@ -127,8 +138,9 @@ sub delete_switch {
 }
 
 sub handle_packetin {
-    my $switch = shift;
+    my $sock = shift;
     my $ofp_packet_in = shift;
+    AppHub->execute($sock, $ofp_packet_in);
     print unpack("H*", $ofp_packet_in->{data});
     print "\n";
 }

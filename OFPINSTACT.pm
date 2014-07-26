@@ -11,7 +11,7 @@ sub new {
     my $class = shift;
     my $self = {};
     bless($self, $class);
-    $self->{type} = 3;
+    $self->{type} = 4;
     $self->{len} = 8;
     return $self;
 }

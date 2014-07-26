@@ -49,8 +49,9 @@ sub set {
 
 sub add {
     my $self = shift;
-    push(@{$self->{insts}}, shift);
-    $self->{header}->{length} = $self->{header}->{length} + $self->{insts}->{len};
+    my $inst = shift;
+    push(@{$self->{insts}}, $inst);
+    $self->{header}->{length} += $inst->{len};
 }
 
 sub encode {
@@ -63,3 +64,5 @@ sub encode {
     }
     return $buf;
 }
+
+1;

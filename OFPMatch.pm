@@ -14,6 +14,7 @@ sub new {
     my $self = {};
     bless($self, $class);
     $self->{type} = 1;
+    $self->{oxm_fields} = [];
     return $self;
 }
 
