@@ -77,6 +77,7 @@ sub handle_switch {
     
     if(length($buf) < 8) {
         print "Malformed Msg\n";
+        delete_switch($sock);
         return;
     }
     

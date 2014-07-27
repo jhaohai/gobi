@@ -36,8 +36,8 @@ sub set {
     $self->{cookie_mask} = 0;
     $self->{table_id} = 0;
     $self->{command} = 0;
-    $self->{idle_timeout} = 1;
-    $self->{hard_timeout} = 1;
+    $self->{idle_timeout} = 5;
+    $self->{hard_timeout} = 0;
     $self->{priority} = 0x8000;
     $self->{buffer_id} = 0xffffffff;
     $self->{out_port} = 0;
