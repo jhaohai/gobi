@@ -17,6 +17,9 @@ sub put {
     push(@prison, $prisoner);
 }
 
-sud Judge {
+sub Judge {
     
 }
+
+
+1;
