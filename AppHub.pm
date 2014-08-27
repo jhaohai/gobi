@@ -8,6 +8,9 @@ use OFPMatch;
 use OFPINSTACT;
 use OFPACTOUT;
 
+my $level = 1;
+my $valid = 0;
+
 sub execute {
     my ($sock, $packet_in) = @_;
     my $ofpmod = OFPFlowMod->new();

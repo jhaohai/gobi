@@ -16,8 +16,19 @@ sub inittable {
     $self->{"0000000000000001"} = ["AppSwitch", "AppFirewall"];
 }
 
-sub execute {
+sub dispatch {
     my $self = shift;
+    my $switch = shift;
+    my $ofp_packet_in = shift;
+    my $dpid = $switch->{dpid};
+    my $collection = [];
+    
+    foreach my $app (@{$self->{$dpid}}) {
+        eval "require $app";
+        push(@{$collection}, $app::execute());
+    }
+    
+    return $collection;
 }
 
 1;
