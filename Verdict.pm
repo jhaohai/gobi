@@ -7,17 +7,12 @@ sub new {
     my $class = shift;
     my $self = {};
     bless($self, $class);
-    $self->{prison} = [];
     return $self;
 }
 
-sub put {
+sub judge {
     my $self = shift;
-    my $prisoner = shift;
-    push(@{$self->{prison}}, $prisoner);
-}
-
-sub Judge {
+    my $collection = shift;
     
 }
 

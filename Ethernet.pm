@@ -22,6 +22,9 @@ sub decode {
     $self->{payload} = substr($data, 14);
 }
 
+
+1;
+
 =pod
 ffffffffffff
 002320f561d0

@@ -14,6 +14,7 @@ use OFPEchoReply;
 use OFPFeaturesReply;
 use OFPPacketIn;
 use OFPSwitch;
+use Data::Dumper;
 
 use AppHub;
 
@@ -109,11 +110,22 @@ sub handle_switch {
         my $ofp_switch_features = OFPFeaturesReply->new();
         $ofp_switch_features->decode($ofp_header, $ofp_data);
         $switch->set($ofp_switch_features);
+        my $ofpmod = OFPFlowMod->new();
+        my $ofpmatch = OFPMatch->new();
+        $ofpmod->set($ofpmatch);
+        my $ofpinst = OFPINSTACT->new();
+        my $ofpact = OFPACTOUT->new();
+        $ofpact->set(0xfffffffd);
+        $ofpinst->add($ofpact);
+        $ofpmod->{priority} = 0x0000;
+        $ofpmod->add($ofpinst);
+        $sock->send($ofpmod->encode());
     }
     elsif($ofp_header->{type} == OFPType->OFPT_PACKET_IN) {
         print "PACKET_IN\n";
         my $ofp_packet_in = OFPPacketIn->new();
         $ofp_packet_in->decode($ofp_header, $ofp_data);
+        print Dumper($ofp_packet_in);
         #handle_packetin($sock, $ofp_packet_in);
         my $ofpmod = OFPFlowMod->new();
         my $ofpmatch = OFPMatch->new();
@@ -123,7 +135,7 @@ sub handle_switch {
         $ofpact->set(0xfffffffc);
         $ofpinst->add($ofpact);
         $ofpmod->add($ofpinst);
-        $sock->send($ofpmod->encode());
+        #$sock->send($ofpmod->encode());
     }
     elsif($ofp_header->{type} == OFPType->OFPT_MULTIPART_REPLY) {
 

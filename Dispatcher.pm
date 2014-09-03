@@ -25,7 +25,7 @@ sub dispatch {
     
     foreach my $app (@{$self->{$dpid}}) {
         eval "require $app";
-        push(@{$collection}, $app::execute());
+        push(@{$collection}, $app->execute());
     }
     
     return $collection;
