@@ -3,6 +3,8 @@ package Dispatcher;
 use strict;
 use warnings;
 
+use AppSwitch;
+
 sub new {
     my $class = shift;
     my $self = {};
@@ -19,13 +21,13 @@ sub inittable {
 sub dispatch {
     my $self = shift;
     my $switch = shift;
-    my $ofp_packet_in = shift;
+    my $packet_in = shift;
     my $dpid = $switch->{dpid};
     my $collection = [];
     
     foreach my $app (@{$self->{$dpid}}) {
-        eval "require $app";
-        push(@{$collection}, $app->execute());
+        #eval "require $app";
+        push(@{$collection}, $app->execute($switch, $packet_in));
     }
     
     return $collection;

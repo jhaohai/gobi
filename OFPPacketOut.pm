@@ -17,7 +17,26 @@ sub new {
     bless($self, $class);
     $self->{header} = OFPHeader->new();
     $self->{header}->{type} = OFPType->OFPT_PACKET_OUT;
+    $self->{actions_len} = 0;
+    $self->{actions} = [];
     return $self;
+}
+
+sub add {
+    my $self = shift;
+    my $action = shift;
+    push(@{$self->{actions}}, $action);
+    $self->{actions_len} += length($action->encode());
+}
+
+sub encode {
+    my $self = shift;
+    my $buf = $self->{header}->encode();
+    $buf .= pack("N N n x6", $self->{buffer_id}, $self->{in_port}, $self->{actions_len});
+    for my $action (@{$self->{actions}}) {
+        $buf .= $action->enocde();
+    }
+    return $buf;
 }
 
 

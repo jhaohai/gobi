@@ -123,10 +123,9 @@ sub handle_switch {
     }
     elsif($ofp_header->{type} == OFPType->OFPT_PACKET_IN) {
         print "PACKET_IN\n";
-        my $ofp_packet_in = OFPPacketIn->new();
-        $ofp_packet_in->decode($ofp_header, $ofp_data);
-        print Dumper($ofp_packet_in);
-        #handle_packetin($sock, $ofp_packet_in);
+        my $packet_in = OFPPacketIn->new();
+        $packet_in->decode($ofp_header, $ofp_data);
+        #handle_packetin($sock, $packet_in);
         my $ofpmod = OFPFlowMod->new();
         my $ofpmatch = OFPMatch->new();
         $ofpmod->set($ofpmatch);
@@ -152,9 +151,9 @@ sub delete_switch {
 
 sub handle_packetin {
     my $sock = shift;
-    my $ofp_packet_in = shift;
-    AppHub->execute($sock, $ofp_packet_in);
-    print unpack("H*", $ofp_packet_in->{data});
+    my $packet_in = shift;
+    AppHub->execute($sock, $packet_in);
+    print unpack("H*", $packet_in->{data});
     print "\n";
 }
 
