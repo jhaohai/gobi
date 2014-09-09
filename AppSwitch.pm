@@ -5,6 +5,8 @@ use warnings;
 
 use ETHType;
 use OFPPacketOut;
+use OFPFlowMod;
+use OFPOXMTLV;
 
 my $level = 1;
 my $valid = 0;
@@ -13,8 +15,9 @@ my $ofpmod;
 my $table = {};
 
 sub execute {
+    shift;
     my ($switch, $packet_in) = @_;
-    my $in_port = $packet_in->{match}->{oxm_fields}->[0]->{value};
+    my $in_port = $packet_in->{match}->{oxm_fields}->[0]->{oxm_value};
     my $dpid = $switch->{dpid};
     my $dst = $packet_in->{data}->{mac_dst};
     my $src = $packet_in->{data}->{mac_src};
@@ -22,7 +25,19 @@ sub execute {
     $table->{$dpid}{$src} = $in_port;
     
     if(exists($table->{$dpid}{$dst})) {
-        
+        my $ofpmod = OFPFlowMod->new();
+        my $ofpmatch = OFPMatch->new();
+        my $oxmtlv = OFPOXMTLV->new();
+        $oxmtlv->set(0x03, $dst);
+        $ofpmatch->add($oxmtlv);
+        $ofpmod->set($ofpmatch);
+        my $ofpinst = OFPINSTACT->new();
+        my $ofpact = OFPACTOUT->new();
+        $ofpact->set($table->{$dpid}{$dst});
+        $ofpinst->add($ofpact);
+        $ofpmod->{priority} = 1;
+        $ofpmod->add($ofpinst);
+        $switch->sendto($ofpmod->encode());
     }
     else {
         my $packet_out = OFPPacketOut->new();
@@ -31,6 +46,9 @@ sub execute {
         my $ofpact = OFPACTOUT->new();
         $ofpact->set(0xfffffffc);
         $packet_out->add($ofpact);
-        $switch->flow($packet_out->encode());
+        $switch->sendto($packet_out->encode());
     }
 }
+
+
+1;

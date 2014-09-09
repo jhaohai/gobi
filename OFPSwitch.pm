@@ -30,4 +30,11 @@ sub set {
     $self->{resrv} = $features->{reserved};
 }
 
+sub sendto {
+    my $self = shift;
+    my $buf = shift;
+    $self->{sock}->send($buf);
+}
+
+
 1;

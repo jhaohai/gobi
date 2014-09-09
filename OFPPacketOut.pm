@@ -31,11 +31,12 @@ sub add {
 
 sub encode {
     my $self = shift;
-    my $buf = $self->{header}->encode();
-    $buf .= pack("N N n x6", $self->{buffer_id}, $self->{in_port}, $self->{actions_len});
+    my $buf = pack("N N n x6", $self->{buffer_id}, $self->{in_port}, $self->{actions_len});
     for my $action (@{$self->{actions}}) {
-        $buf .= $action->enocde();
+        $buf .= $action->encode();
     }
+    $self->{header}->{length} = length($buf) + 8;
+    $buf = $self->{header}->encode().$buf;
     return $buf;
 }
 

@@ -39,7 +39,7 @@ sub add {
 sub encode {
     my $self = shift;
     my $body = "";
-    foreach my $oxmtlv (@{$self->{oxm_flelds}}) {
+    foreach my $oxmtlv (@{$self->{oxm_fields}}) {
         $body .= $oxmtlv->encode();
     }
     my $len = length($body) + 4;

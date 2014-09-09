@@ -13,6 +13,7 @@ sub new {
     my $self = {};
     bless($self, $class);
     $self->{version} = 0x04;
+    $self->{xid} = 0;
     return $self;
 }
 

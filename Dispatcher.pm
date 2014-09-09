@@ -14,8 +14,8 @@ sub new {
 
 sub inittable {
     my $self = shift;
-    $self->{"0000000000000000"} = ["AppHub", "AppFirewall"];
-    $self->{"0000000000000001"} = ["AppSwitch", "AppFirewall"];
+    $self->{"0000000000000000"} = ["AppSwitch"];
+    $self->{"0000000000000001"} = ["AppSwitch"];
 }
 
 sub dispatch {
@@ -27,7 +27,8 @@ sub dispatch {
     
     foreach my $app (@{$self->{$dpid}}) {
         #eval "require $app";
-        push(@{$collection}, $app->execute($switch, $packet_in));
+        #push(@{$collection}, $app->execute($switch, $packet_in));
+        $app->execute($switch, $packet_in);
     }
     
     return $collection;

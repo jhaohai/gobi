@@ -51,13 +51,13 @@ sub set {
         $self->{oxm_length} = 4;
     }
     elsif($self->{oxm_field} == 0x03) {
-        $self->{oxm_value} = 6;
+        $self->{oxm_length} = 6;
     }
     elsif($self->{oxm_field} == 0x04) {
-        $self->{oxm_value} = 6;
+        $self->{oxm_length} = 6;
     }
     elsif($self->{oxm_field} == 0x05) {
-        $self->{oxm_value} = 2;
+        $self->{oxm_length} = 2;
     }
     else {
         $self->{oxm_length} = length($self->{oxm_value});
@@ -68,19 +68,20 @@ sub encode {
     my $self = shift;
     my $oxm_fh = $self->{oxm_field} * 2 + $self->{oxm_hasmask};
     my $buf = pack("n C C", $self->{oxm_class}, $oxm_fh, $self->{oxm_length});
+    my $value;
     if($self->{oxm_field} == 0x00) {
-        $self->{oxm_value} = pack("N", $self->{value});
+        $value = pack("N", $self->{value});
     }
     elsif($self->{oxm_field} == 0x03) {
-        $self->{oxm_value} = pack("H12", substr($buf, 4, $self->{oxm_value}));
+        $value = pack("H12", $self->{oxm_value});
     }
     elsif($self->{oxm_field} == 0x04) {
-        $self->{oxm_value} = pack("H12", substr($buf, 4, $self->{oxm_value}));
+        $value = pack("H12", $self->{oxm_value});
     }
     elsif($self->{oxm_field} == 0x05) {
-        $self->{oxm_value} = pack("n", substr($buf, 4, $self->{oxm_value}));
+        $value = pack("n", $self->{oxm_value});
     }
-    $buf .= $self->{oxm_value};
+    $buf .= $value;
     return $buf;
 }
 

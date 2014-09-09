@@ -14,13 +14,10 @@ use OFPEchoReply;
 use OFPFeaturesReply;
 use OFPPacketIn;
 use OFPSwitch;
-use Data::Dumper;
-
-use AppHub;
-
-my $select;
-my $server;
-my %switches;
+use Dispatcher;
+use OFPFlowMod;
+use OFPINSTACT;
+use OFPACTOUT;
 
 sub new {
     my $class = shift;
@@ -31,24 +28,28 @@ sub new {
 
 sub init {
     my $self = shift;
-    $server = IO::Socket::INET->new(
+    my $server = IO::Socket::INET->new(
         Proto       => "tcp",
         LocalPort   => 6633,
         ReuseAddr   => 1,
         Listen      => SOMAXCONN,
     ) or die "Cannot Initiate Socket: $!\n";
-    $select = IO::Select->new($server);
+    $self->{server} = $server;
+    $self->{select} = IO::Select->new($server);
+    $self->{switches} = {};
+    $self->{dispatcher} = Dispatcher->new();
+    $self->{dispatcher}->inittable();
 }
 
 sub start {
     my $self = shift;
     while (1) {
-        foreach my $sock ($select->can_read()) {
-            if($sock == $server) {
-                handle_new();
+        foreach my $sock ($self->{select}->can_read()) {
+            if($sock == $self->{server}) {
+                $self->handle_new($sock);
             }
             else {
-                handle_switch($sock);
+                $self->handle_switch($sock);
             }
         }  
     }
@@ -56,21 +57,23 @@ sub start {
 
 sub handle_new {
     print "New Switch In\n";
+    my $self = shift;
+    my $sock = shift;
+    my $new = $sock->accept();
     
-    my $new = $server->accept();
-   
     my $ofp_hello = OFPHello->new();
     $new->send($ofp_hello->encode());
-    $select->add($new);
+    $self->{select}->add($new);
                 
     my $switch = OFPSwitch->new();
     $switch->{sock} = $new;
-    $switches{$new} = $switch;
+    $self->{switches}->{$new} = $switch;
 }
 
 sub handle_switch {
+    my $self= shift;
     my $sock = shift;
-    my $switch = $switches{$sock};
+    my $switch = $self->{switches}->{$sock};
     
     print $switch->{dpid}.":";
     
@@ -78,7 +81,7 @@ sub handle_switch {
     
     if(length($buf) < 8) {
         print "Malformed Msg\n";
-        delete_switch($sock);
+        $self->delete_switch($sock);
         return;
     }
     
@@ -119,22 +122,13 @@ sub handle_switch {
         $ofpinst->add($ofpact);
         $ofpmod->{priority} = 0x0000;
         $ofpmod->add($ofpinst);
-        $sock->send($ofpmod->encode());
+        $switch->sendto($ofpmod->encode());
     }
     elsif($ofp_header->{type} == OFPType->OFPT_PACKET_IN) {
         print "PACKET_IN\n";
         my $packet_in = OFPPacketIn->new();
         $packet_in->decode($ofp_header, $ofp_data);
-        #handle_packetin($sock, $packet_in);
-        my $ofpmod = OFPFlowMod->new();
-        my $ofpmatch = OFPMatch->new();
-        $ofpmod->set($ofpmatch);
-        my $ofpinst = OFPINSTACT->new();
-        my $ofpact = OFPACTOUT->new();
-        $ofpact->set(0xfffffffc);
-        $ofpinst->add($ofpact);
-        $ofpmod->add($ofpinst);
-        #$sock->send($ofpmod->encode());
+        $self->{dispatcher}->dispatch($switch, $packet_in);
     }
     elsif($ofp_header->{type} == OFPType->OFPT_MULTIPART_REPLY) {
 
@@ -143,9 +137,10 @@ sub handle_switch {
 }
 
 sub delete_switch {
+    my $self = shift;
     my $sock = shift;
-    $select->remove($sock);
-    delete $switches{$sock};
+    $self->{select}->remove($sock);
+    delete $self->{switches}->{$sock};
     $sock->close();
 }
 
