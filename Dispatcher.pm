@@ -23,15 +23,14 @@ sub dispatch {
     my $switch = shift;
     my $packet_in = shift;
     my $dpid = $switch->{dpid};
-    my $collection = [];
+    my $results = [];
     
     foreach my $app (@{$self->{$dpid}}) {
-        #eval "require $app";
-        #push(@{$collection}, $app->execute($switch, $packet_in));
-        $app->execute($switch, $packet_in);
+        push(@{$results}, $app->execute($switch, $packet_in));
+        #$app->execute($switch, $packet_in);
     }
     
-    return $collection;
+    return $results;
 }
 
 1;

@@ -128,7 +128,8 @@ sub handle_switch {
         print "PACKET_IN\n";
         my $packet_in = OFPPacketIn->new();
         $packet_in->decode($ofp_header, $ofp_data);
-        $self->{dispatcher}->dispatch($switch, $packet_in);
+        my $results = $self->{dispatcher}->dispatch($switch, $packet_in);
+        my $final = Verdict->judge($results);
     }
     elsif($ofp_header->{type} == OFPType->OFPT_MULTIPART_REPLY) {
 

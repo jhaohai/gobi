@@ -24,6 +24,9 @@ sub execute {
     
     $table->{$dpid}{$src} = $in_port;
     
+    my $result = {};
+    $result->{priority} = 1;
+    
     if(exists($table->{$dpid}{$dst})) {
         my $ofpmod = OFPFlowMod->new();
         my $ofpmatch = OFPMatch->new();
@@ -37,7 +40,8 @@ sub execute {
         $ofpinst->add($ofpact);
         $ofpmod->{priority} = 1;
         $ofpmod->add($ofpinst);
-        $switch->sendto($ofpmod->encode());
+        $result->{out} = $ofpmod->encode();
+        $result->{valid} = 1;
     }
     else {
         my $packet_out = OFPPacketOut->new();
@@ -46,7 +50,8 @@ sub execute {
         my $ofpact = OFPACTOUT->new();
         $ofpact->set(0xfffffffc);
         $packet_out->add($ofpact);
-        $switch->sendto($packet_out->encode());
+        $result->{out} = $packet_out->encode();
+        $result->{valid} = 1;
     }
 }
 
