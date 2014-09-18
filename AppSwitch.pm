@@ -3,7 +3,6 @@ package AppSwitch;
 use strict;
 use warnings;
 
-use ETHType;
 use OFPPacketOut;
 use OFPFlowMod;
 use OFPOXMTLV;
@@ -53,6 +52,7 @@ sub execute {
         $result->{out} = $packet_out->encode();
         $result->{valid} = 1;
     }
+    return $result;
 }
 
 

@@ -18,6 +18,8 @@ use Dispatcher;
 use OFPFlowMod;
 use OFPINSTACT;
 use OFPACTOUT;
+use OFPOXMTLV;
+use ETHType;
 
 sub new {
     my $class = shift;
@@ -113,16 +115,8 @@ sub handle_switch {
         my $ofp_switch_features = OFPFeaturesReply->new();
         $ofp_switch_features->decode($ofp_header, $ofp_data);
         $switch->set($ofp_switch_features);
-        my $ofpmod = OFPFlowMod->new();
-        my $ofpmatch = OFPMatch->new();
-        $ofpmod->set($ofpmatch);
-        my $ofpinst = OFPINSTACT->new();
-        my $ofpact = OFPACTOUT->new();
-        $ofpact->set(0xfffffffd);
-        $ofpinst->add($ofpact);
-        $ofpmod->{priority} = 0x0000;
-        $ofpmod->add($ofpinst);
-        $switch->sendto($ofpmod->encode());
+        $self->default_flow($switch);
+        $self->diable_ipv6($switch);
     }
     elsif($ofp_header->{type} == OFPType->OFPT_PACKET_IN) {
         print "PACKET_IN\n";
@@ -130,11 +124,42 @@ sub handle_switch {
         $packet_in->decode($ofp_header, $ofp_data);
         my $results = $self->{dispatcher}->dispatch($switch, $packet_in);
         my $final = Verdict->judge($results);
+        if($final->{valid} == 1) {
+            $switch->sendto($final->{out});
+        }
     }
     elsif($ofp_header->{type} == OFPType->OFPT_MULTIPART_REPLY) {
 
     }
 
+}
+
+sub default_flow {
+    my $self = shift;
+    my $switch = shift;
+    my $ofpmod = OFPFlowMod->new();
+    my $ofpmatch = OFPMatch->new();
+    $ofpmod->set($ofpmatch);
+    my $ofpinst = OFPINSTACT->new();
+    my $ofpact = OFPACTOUT->new();
+    $ofpact->set(0xfffffffd);
+    $ofpinst->add($ofpact);
+    $ofpmod->{priority} = 0x0000;
+    $ofpmod->add($ofpinst);
+    $switch->sendto($ofpmod->encode());
+}
+
+sub disable_ipv6 {
+    my $self = shift;
+    my $switch = shift;
+    my $ofpmod = OFPFlowMod->new();
+    my $ofpmatch = OFPMatch->new();
+    my $oxmtlv = OFPOXMTLV->new();
+    $oxmtlv->set(0x05, ETHType->ETH_IPV6);
+    $ofpmatch->add($oxmtlv);
+    $ofpmod->set($ofpmatch);
+    $ofpmod->{priority} = 0x0000;
+    $switch->sendto($ofpmod->encode());
 }
 
 sub delete_switch {

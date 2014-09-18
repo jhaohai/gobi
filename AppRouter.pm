@@ -8,5 +8,10 @@ my $valid = 0;
 my $ofpmod;
 
 sub execute {
-    my ($sock, $packet_in) = @_;
+    shift;
+    my ($switch, $packet_in) = @_;
+    my $in_port = $packet_in->{match}->{oxm_fields}->[0]->{oxm_value};
+    my $dpid = $switch->{dpid};
+    
+    
 }
