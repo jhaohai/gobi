@@ -6,7 +6,7 @@ use warnings;
 use OFPType;
 use OFPHeader;
 use OFPMatch;
-use Ethernet;
+use Net::Packet;
 
 my $header;
 my $buffer_id;
@@ -34,8 +34,7 @@ sub decode {
     my $len = unpack("n", substr($buf, 18, 2));
     my $full_len = int(($len + 7) / 8) * 8;
     $self->{match}->decode(substr($buf, 16, $len));
-    $self->{data} = Ethernet->new();
-    $self->{data}->decode(substr($buf, 16 + $full_len + 2));
+    $self->{data} = Net::Packet::ETH->new(raw => substr($buf, 16 + $full_len + 2));
     my $eth_len = $self->{header}->{length} - 24 - $full_len;
 }
 

@@ -9,6 +9,8 @@ my $mac_dst;
 my $mac_src;
 my $eth_type;
 my $payload;
+my $ip_src;
+my $ip_dst;
 
 sub new {
     my $class = shift;

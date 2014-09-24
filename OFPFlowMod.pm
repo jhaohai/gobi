@@ -45,6 +45,7 @@ sub set {
     $self->{flags} = 0;
     $self->{match} = shift;
     $self->{header}->{length} = 48 + length($self->{match}->encode());
+    $self->{insts} = [];
 }
 
 sub add {

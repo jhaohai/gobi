@@ -19,7 +19,7 @@ use OFPFlowMod;
 use OFPINSTACT;
 use OFPACTOUT;
 use OFPOXMTLV;
-use ETHType;
+use Net::Packet::Consts qw(:eth);
 
 sub new {
     my $class = shift;
@@ -155,7 +155,7 @@ sub disable_ipv6 {
     my $ofpmod = OFPFlowMod->new();
     my $ofpmatch = OFPMatch->new();
     my $oxmtlv = OFPOXMTLV->new();
-    $oxmtlv->set(0x05, ETHType->ETH_IPV6);
+    $oxmtlv->set(0x05, NP_ETH_TYPE_IPv6);
     $ofpmatch->add($oxmtlv);
     $ofpmod->set($ofpmatch);
     $ofpmod->{priority} = 0x0000;
