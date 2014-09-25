@@ -10,6 +10,7 @@ my $buffer_id;
 my $in_port;
 my $actions_len;
 my @actions;
+my $data;
 
 sub new {
     my $class = shift;
@@ -30,6 +31,7 @@ sub add {
 }
 
 sub encode {
+    #TODO packet out with data
     my $self = shift;
     my $buf = pack("N N n x6", $self->{buffer_id}, $self->{in_port}, $self->{actions_len});
     for my $action (@{$self->{actions}}) {
