@@ -20,8 +20,8 @@ sub execute {
     my ($switch, $packet_in) = @_;
     my $in_port = $packet_in->{match}->{oxm_fields}->[0]->{oxm_value};
     my $dpid = $switch->{dpid};
-    my $dst = $packet_in->{data}->{dst};
-    my $src = $packet_in->{data}->{src};
+    my $dst_mac = $packet_in->{data}->{dst};
+    my $src_mac = $packet_in->{data}->{src};
     
     my $result = {};
     $result->{priority} = 1;
@@ -36,6 +36,10 @@ sub execute {
         $arptable->{$dpid}{$src_ip} = $src_mac;
         $routetable->{$dpid}{$src_ip} = $in_port;
         
+        if(exists($arptable->{$dpid}{$dst_ip}) && exists($routetable->{$dpid}{$dst_ip})) {
+            
+        }
+        
         if($arp_in->opCode == NP_ARP_OPCODE_REQUEST) {
             if(exists($arptable->{$dpid}{$dst_ip}) && exists($routetable->{$dpid}{$dst_ip})) {
                 my $arp_out = Net::Packet::ARP->new(opCode => NP_ARP_OPCODE_REPLY, src => $switchtable->{$dpid}, dst => $src_mac, srcIp => $dst_ip, dstIp => $src_ip);
@@ -45,6 +49,7 @@ sub execute {
                 #TODO packet out
             }
             else {
+                my $arp_out = Net::Packet::ARP->new(opCode => NP_ARP_OPCODE_REPLY, src => $switchtable->{$dpid}, srcIp => $)
                 #TODO packet out
             }
         }
@@ -53,6 +58,22 @@ sub execute {
         }
     }
     else if($packet_in->{data}->{type} == NP_ETH_TYPE_IPV4) {
+        my $ip_in = Net::Packet::IPv4->new(raw => $packet_in->{data}->payload);
+        my $src_ip = $ip_in->src;
+        my $dst_ip = $ip_in->dst;
         
+        $arptable->{$dpid}{$src_ip} = $src_mac;
+        $routetable->{$dpid}{$src_ip} = $in_port;
+        
+        if(exists($arptable->{$dpid}{$dst_ip}) && exists($routetable->{$dpid}{$dst_ip})) {
+            my $new_dst_mac = $arptable->{$dpid}{$dst_ip};
+            my $out_port = $routetable->{$dpid}{$dst_ip};
+            my $new_src_mac = $swtichtable->{$dpid};
+        }
+        else {
+            my $new_dst_mac = NP_ETH_ADDR_BROADCAST;
+            my $out_port = 0xfffffffc;
+            my $new_src_mac = $switchtable->{$dpid};
+        }
     }
 }
