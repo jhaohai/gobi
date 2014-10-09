@@ -38,13 +38,25 @@ sub execute {
             my $new_dst_mac = $arptable->{$dpid}{$dst_ip};
             my $out_port = $routetable->{$dpid}{$dst_ip};
             my $new_src_mac = $swtichtable->{$dpid};
+            if($out_port == $in_port) {
+                #TODO IGNORE
+            }
             #TODO FlowMod
+            my $ofpmod = OFPFlowMod->new();
+            my $ofpmatch = OFPMatch->new();
+            my $oxmtlv = OFPOXMTLV->new();
+            $oxmtlv->set(0x0c, $dst_ip);
+            $ofpmatch->add($oxmtlv);
+            $ofpmod->set($ofpmatch);
+            my $ofpinst = OFPINSTACT->new();
+            my $ofpactset = OFPACTSET->new();
+            my $ofpactout = OFPACTOUT->new();
         }
         else {
             my $new_dst_mac = NP_ETH_ADDR_BROADCAST;
             my $out_port = 0xfffffffc;
             my $new_src_mac = $switchtable->{$dpid};
-            #TODO PacketOut
+            #TODO PacketOut Flood
         }
     }
 }
