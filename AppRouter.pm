@@ -39,9 +39,9 @@ sub execute {
             my $out_port = $routetable->{$dpid}{$dst_ip};
             my $new_src_mac = $swtichtable->{$dpid};
             if($out_port == $in_port) {
-                #TODO IGNORE
+                $result->{valid} = 0
+                return $result;
             }
-            #TODO FlowMod
             my $ofpmod = OFPFlowMod->new();
             my $ofpmatch = OFPMatch->new();
             my $oxmtlv = OFPOXMTLV->new();
@@ -49,14 +49,38 @@ sub execute {
             $ofpmatch->add($oxmtlv);
             $ofpmod->set($ofpmatch);
             my $ofpinst = OFPINSTACT->new();
-            my $ofpactset = OFPACTSET->new();
+            my $ofpactset_dst = OFPACTSET->new();
+            my $ofpactset_src = OFPACTSET->new();
             my $ofpactout = OFPACTOUT->new();
+            $ofpactset_dst->set(0x03, $new_dst_mac);
+            $ofpactset_src->set(0x04, $new_src_mac);
+            $ofpactout->set($out_port);
+            $ofpinst->add($ofpactset_dst);
+            $ofpinst->add($ofpactset_src);
+            $ofpinst->add($ofpactout);
+            $ofpmod->add($ofpinst);
+            $result->{valid} = 1;
+            $result->{out} = $ofpmod->encode();
         }
         else {
             my $new_dst_mac = NP_ETH_ADDR_BROADCAST;
             my $out_port = 0xfffffffc;
             my $new_src_mac = $switchtable->{$dpid};
-            #TODO PacketOut Flood
+            my $packet_out = OFPPacketOut->new();
+            $packet_out->{buffer_id} = $packet_in->{buffer_id};
+            $packet_out->{in_port} = $in_port;
+            my $ofpactset_dst = OFPACTSET->new();
+            my $ofpactset_src = OFPACTSET->new();
+            my $ofpactout = OFPACTOUT->new();
+            $ofpactset_dst->set(0x03, $new_dst_mac);
+            $ofpactset_src->set(0x04, $new_src_mac);
+            $ofpactout->set($out_port);
+            $packet_out->add($ofpactset_dst);
+            $packet_out->add($ofpactset_src);
+            $packet_out->add($ofpactout);
+            $result->{out} = $packet_out->encode();
+            $result->{valid} = 1;
         }
+        return $result;
     }
 }
