@@ -18,8 +18,10 @@ use Dispatcher;
 use OFPFlowMod;
 use OFPINSTACT;
 use OFPACTOUT;
+use OFPACTSET;
 use OFPOXMTLV;
 use Net::Packet::Consts qw(:eth);
+use Verdict;
 
 sub new {
     my $class = shift;
@@ -115,8 +117,8 @@ sub handle_switch {
         my $ofp_switch_features = OFPFeaturesReply->new();
         $ofp_switch_features->decode($ofp_header, $ofp_data);
         $switch->set($ofp_switch_features);
+        $self->disable_ipv6($switch);
         $self->default_flow($switch);
-        $self->diable_ipv6($switch);
     }
     elsif($ofp_header->{type} == OFPType->OFPT_PACKET_IN) {
         print "PACKET_IN\n";

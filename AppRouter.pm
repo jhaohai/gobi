@@ -5,6 +5,7 @@ use warnings;
 
 use Net::Packet;
 use Net::Packet::Consts qw(:eth :arp);
+use Data::Dumper;
 
 my $level = 1;
 my $valid = 0;
@@ -12,21 +13,29 @@ my $ofpmod;
 
 my $arptable = {};
 my $routetable = {};
-my $switchtable = {};
+my $switchtable = {"0000000000000001" => "10:00:00:00:00:00",
+                     "0000000000000002" => "20:00:00:00:00:00"};
 my $iptable = {};
 
 sub execute {
     shift;
+    print "Router\n";
     my ($switch, $packet_in) = @_;
     my $in_port = $packet_in->{match}->{oxm_fields}->[0]->{oxm_value};
     my $dpid = $switch->{dpid};
-    my $dst_mac = $packet_in->{data}->{dst};
-    my $src_mac = $packet_in->{data}->{src};
+    my $dst_mac = $packet_in->{data}->dst;
+    my $src_mac = $packet_in->{data}->src;
     
     my $result = {};
     $result->{priority} = 1;
+    $result->{valid} = 0;
     
-    if($packet_in->{data}->{type} == NP_ETH_TYPE_IPV4) {
+    if(($packet_in->{data}->type == NP_ETH_TYPE_IPv4) && ($dst_mac eq "ff:ff:ff:ff:ff:ff")) {
+        $result->{valid} = 0;
+        return $result;
+    }
+    
+    if($packet_in->{data}->type == NP_ETH_TYPE_IPv4) {
         my $ip_in = Net::Packet::IPv4->new(raw => $packet_in->{data}->payload);
         my $src_ip = $ip_in->src;
         my $dst_ip = $ip_in->dst;
@@ -37,16 +46,19 @@ sub execute {
         if(exists($arptable->{$dpid}{$dst_ip}) && exists($routetable->{$dpid}{$dst_ip})) {
             my $new_dst_mac = $arptable->{$dpid}{$dst_ip};
             my $out_port = $routetable->{$dpid}{$dst_ip};
-            my $new_src_mac = $swtichtable->{$dpid};
+            my $new_src_mac = $switchtable->{$dpid};
             if($out_port == $in_port) {
-                $result->{valid} = 0
+                $result->{valid} = 0;
                 return $result;
             }
             my $ofpmod = OFPFlowMod->new();
             my $ofpmatch = OFPMatch->new();
-            my $oxmtlv = OFPOXMTLV->new();
-            $oxmtlv->set(0x0c, $dst_ip);
-            $ofpmatch->add($oxmtlv);
+            my $oxmtlveth = OFPOXMTLV->new();
+            $oxmtlveth->set(0x05, 0x0800);
+            $ofpmatch->add($oxmtlveth);
+            my $oxmtlvip = OFPOXMTLV->new();
+            $oxmtlvip->set(0x0c, $dst_ip);
+            $ofpmatch->add($oxmtlvip);
             $ofpmod->set($ofpmatch);
             my $ofpinst = OFPINSTACT->new();
             my $ofpactset_dst = OFPACTSET->new();
@@ -81,6 +93,7 @@ sub execute {
             $result->{out} = $packet_out->encode();
             $result->{valid} = 1;
         }
-        return $result;
     }
+    
+    return $result;
 }

@@ -4,6 +4,7 @@ use strict;
 use warnings;
 
 use AppSwitch;
+use AppRouter;
 
 sub new {
     my $class = shift;
@@ -14,8 +15,8 @@ sub new {
 
 sub inittable {
     my $self = shift;
-    $self->{"0000000000000000"} = ["AppSwitch"];
     $self->{"0000000000000001"} = ["AppSwitch"];
+    $self->{"0000000000000002"} = ["AppRouter"];
 }
 
 sub dispatch {

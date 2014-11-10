@@ -2,6 +2,7 @@ package OFPOXMTLV;
 
 use strict;
 use warnings;
+use Data::Dumper;
 
 my $oxm_class;
 my $oxm_field;
@@ -86,10 +87,11 @@ sub encode {
     my $buf = pack("n C C", $self->{oxm_class}, $oxm_fh, $self->{oxm_length});
     my $value;
     if($self->{oxm_field} == 0x00) {
-        $value = pack("N", $self->{value});
+        $value = pack("N", $self->{oxm_value});
     }
     elsif($self->{oxm_field} == 0x03) {
         my @eth = split(":", $self->{oxm_value});
+        print Dumper(@eth);
         $value = pack("H2" x 6, @eth);
     }
     elsif($self->{oxm_field} == 0x04) {
@@ -100,11 +102,12 @@ sub encode {
         $value = pack("n", $self->{oxm_value});
     }
     elsif($self->{oxm_field} == 0x0b) {
-        my @ip = split(".", $self->{oxm_value});
+        my @ip = split(/\./, $self->{oxm_value});
         $value = pack("C" x 4, @ip);
     }
     elsif($self->{oxm_field} == 0x0c) {
-        my @ip = split(".", $self->{oxm_value});
+        my @ip = split(/\./, $self->{oxm_value});
+        print Dumper(@ip);
         $value = pack("C" x 4, @ip);
     }
     $buf .= $value;

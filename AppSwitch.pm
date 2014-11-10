@@ -6,6 +6,7 @@ use warnings;
 use OFPPacketOut;
 use OFPFlowMod;
 use OFPOXMTLV;
+use Net::Packet::Consts qw(:eth :arp);
 
 my $level = 1;
 my $valid = 0;
@@ -15,16 +16,24 @@ my $mactable = {};
 
 sub execute {
     shift;
+    print "Switch\n";
     my ($switch, $packet_in) = @_;
     my $in_port = $packet_in->{match}->{oxm_fields}->[0]->{oxm_value};
     my $dpid = $switch->{dpid};
-    my $dst = $packet_in->{data}->{dst};
-    my $src = $packet_in->{data}->{src};
+    my $dst = $packet_in->{data}->dst;
+    my $src = $packet_in->{data}->src;
     
     my $result = {};
     $result->{priority} = 1;
+    $result->{valid} = 0;
+    if($dst ne "ff:ff:ff:ff:ff:ff") {
+        $mactable->{$dpid}{$src} = $in_port;
+    }
     
-    $mactable->{$dpid}{$src} = $in_port;
+    if(($packet_in->{data}->type == NP_ETH_TYPE_IPv4) && ($dst eq "ff:ff:ff:ff:ff:ff")) {
+        $result->{valid} = 0;
+        return $result;
+    }
     
     if(exists($mactable->{$dpid}{$dst})) {
         my $ofpmod = OFPFlowMod->new();

@@ -10,7 +10,7 @@ sub judge {
     $final->{priority} = 0;
     $final->{valid} = 0;
     foreach my $result (@{$results}) {
-        if(($final->{priority} < $resullt->{priority}) && ($result->{valid} == 1)) {
+        if(($final->{priority} < $result->{priority}) && ($result->{valid} == 1)) {
             $final = $result;
         }
     }
