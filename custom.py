@@ -20,7 +20,7 @@ from mininet.log import setLogLevel
 if __name__ == '__main__':
     setLogLevel('info')
     net = Mininet(controller=RemoteController)
-    c0 = RemoteController("custom", ip='10.109.242.209')
+    c0 = RemoteController("custom", ip='192.168.56.1')
     net.addController( c0 )
     
     # Add hosts and switches
@@ -42,7 +42,7 @@ if __name__ == '__main__':
     # Configure host
     h1.setMAC( '00:00:00:00:00:01', 'h1-eth0')
     h1.setDefaultRoute('dev h1-eth0 via 10.0.0.1')
-    h1.setARP( '10.0.0.1', '20:00:00:00:00:00' )  
+    h1.setARP( '10.0.0.1', '20:00:00:00:00:00' )
     
     h2.setMAC( '00:00:00:00:00:02', 'h2-eth0')
     h2.setDefaultRoute('dev h2-eth0 via 10.0.0.1')

@@ -91,7 +91,6 @@ sub encode {
     }
     elsif($self->{oxm_field} == 0x03) {
         my @eth = split(":", $self->{oxm_value});
-        print Dumper(@eth);
         $value = pack("H2" x 6, @eth);
     }
     elsif($self->{oxm_field} == 0x04) {
@@ -107,7 +106,6 @@ sub encode {
     }
     elsif($self->{oxm_field} == 0x0c) {
         my @ip = split(/\./, $self->{oxm_value});
-        print Dumper(@ip);
         $value = pack("C" x 4, @ip);
     }
     $buf .= $value;

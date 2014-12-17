@@ -16,7 +16,6 @@ my $mactable = {};
 
 sub execute {
     shift;
-    print "Switch\n";
     my ($switch, $packet_in) = @_;
     my $in_port = $packet_in->{match}->{oxm_fields}->[0]->{oxm_value};
     my $dpid = $switch->{dpid};
@@ -26,12 +25,20 @@ sub execute {
     my $result = {};
     $result->{priority} = 1;
     $result->{valid} = 0;
-    if($dst ne "ff:ff:ff:ff:ff:ff") {
+    
+    if($src ne "ff:ff:ff:ff:ff:ff") {
         $mactable->{$dpid}{$src} = $in_port;
     }
     
     if(($packet_in->{data}->type == NP_ETH_TYPE_IPv4) && ($dst eq "ff:ff:ff:ff:ff:ff")) {
-        $result->{valid} = 0;
+        my $packet_out = OFPPacketOut->new();
+        $packet_out->{buffer_id} = $packet_in->{buffer_id};
+        $packet_out->{in_port} = $in_port;
+        my $ofpact = OFPACTOUT->new();
+        $ofpact->set(0xfffffffc);
+        $packet_out->add($ofpact);
+        $result->{out} = $packet_out->encode();
+        $result->{valid} = 1;
         return $result;
     }
     

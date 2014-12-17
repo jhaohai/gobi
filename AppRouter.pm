@@ -13,13 +13,11 @@ my $ofpmod;
 
 my $arptable = {};
 my $routetable = {};
-my $switchtable = {"0000000000000001" => "10:00:00:00:00:00",
-                     "0000000000000002" => "20:00:00:00:00:00"};
+my $switchtable = {"0000000000000002" => "20:00:00:00:00:00"};
 my $iptable = {};
 
 sub execute {
     shift;
-    print "Router\n";
     my ($switch, $packet_in) = @_;
     my $in_port = $packet_in->{match}->{oxm_fields}->[0]->{oxm_value};
     my $dpid = $switch->{dpid};
